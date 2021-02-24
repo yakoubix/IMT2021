@@ -9,5 +9,5 @@ test: main
 	./main
 
 main: *.hpp *.cpp
-	g++ *.cpp -g0 -O3 -lQuantLib -o main
+	g++ *.cpp -std=c++17 -g0 -O3 -lQuantLib -o main
 

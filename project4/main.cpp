@@ -11,6 +11,9 @@
 #include <ql/utilities/dataformatters.hpp>
 #include <iostream>
 #include <chrono>
+#ifdef BOOST_MSVC
+#include <ql/auto_link.hpp>
+#endif
 
 using namespace QuantLib;
 
@@ -19,7 +22,6 @@ int main() {
     try {
 
         // modify the sample code below to suit your project
-
         Calendar calendar = TARGET();
         Date today = Date(24, February, 2021);
         Settings::instance().evaluationDate() = today;
@@ -49,8 +51,9 @@ int main() {
         VanillaOption americanOption(payoff, americanExercise);
 
         Size timeSteps = 100;
+        bool b1 = false;
         ext::shared_ptr<PricingEngine> engine(
-                new BinomialVanillaEngine_2<JarrowRudd>(bsmProcess,timeSteps));
+                new BinomialVanillaEngine_2<JarrowRudd>(bsmProcess,timeSteps,b1));
         americanOption.setPricingEngine(engine);
 
         auto startTime = std::chrono::steady_clock::now();

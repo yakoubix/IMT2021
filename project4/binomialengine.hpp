@@ -35,6 +35,7 @@
 #include <ql/processes/blackscholesprocess.hpp>
 #include <ql/termstructures/yield/flatforward.hpp>
 #include <ql/termstructures/volatility/equityfx/blackconstantvol.hpp>
+#include <ql/pricingengines/blackcalculator.hpp>
 #include <iostream>
 
 namespace QuantLib {
@@ -58,7 +59,7 @@ namespace QuantLib {
              const boost::shared_ptr<GeneralizedBlackScholesProcess>& process,
              Size timeSteps,
              bool oscillations)
-        : process_(process), timeSteps_(timeSteps) {
+        : process_(process), timeSteps_(timeSteps), oscillations_(oscillations) {
             QL_REQUIRE(timeSteps >= 2,
                        "at least 2 time steps required, "
                        << timeSteps << " provided");
@@ -107,7 +108,6 @@ namespace QuantLib {
         boost::shared_ptr<PlainVanillaPayoff> payoff =
             boost::dynamic_pointer_cast<PlainVanillaPayoff>(arguments_.payoff);
         QL_REQUIRE(payoff, "non-plain payoff given");
-
         Time maturity = rfdc.yearFraction(referenceDate, maturityDate);
 
         boost::shared_ptr<StochasticProcess1D> bs(
@@ -119,7 +119,6 @@ namespace QuantLib {
 
         boost::shared_ptr<T> tree(new T(bs, maturity, timeSteps_,
                                         payoff->strike()));
-
         boost::shared_ptr<BlackScholesLattice<T> > lattice(
             new BlackScholesLattice<T>(tree, r, maturity, timeSteps_));
         DiscretizedVanillaOption option(arguments_, *process_, grid);
@@ -136,23 +135,19 @@ namespace QuantLib {
 
         Real* prices_pen = new Real[timeSteps_ - 1];
         Real* underlyings_pen = new Real[timeSteps_ - 1];
-        option.rollback(grid[timeSteps_ - 2]);
-        Array values_to_modify(option.values());
-        std::cout << "heaaaaaaa " << values_to_modify << std::size(values_to_modify) << std::endl;
-        //std::cout << "heaaaaaxxxxxxaa " << oscillations_ << std::endl;
+
         if (oscillations_ == true) {
             option.rollback(grid[timeSteps_ - 2]);
             Array vapenu(option.values());
-            std::cout << "hxxxxxxxxxxxxxxa " << std::endl;
             QL_ENSURE(vapenu.size() == timeSteps_ - 1, "Expect time steps minus 1 nodes in grid at penultimate step");
             for (int i = 0; i < timeSteps_-2; i++) {
-                prices_pen[i] = vapenu[i];
                 underlyings_pen[i] = lattice->underlying(timeSteps_ - 2, i);
-                //values_to_modify[i] = ;
+                BlackCalculator bs_option(payoff->optionType(), payoff->strike(), underlyings_pen[i], v*std::sqrt(maturity/timeSteps_), std::exp(-r* maturity/ timeSteps_));
+                Real value_bs = bs_option.value();
+                prices_pen[i] = value_bs;
+                option.values()[i] = prices_pen[i];
             } 
-
         }
-
         
          // Rollback to third-last step, and get underlying prices (s2) &
         // option values (p2) at this point

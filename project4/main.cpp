@@ -50,7 +50,7 @@ int main() {
         // options
         VanillaOption americanOption(payoff, americanExercise);
 
-        Size timeSteps = 409;
+        Size timeSteps = 423;
         bool b1 = true;
         ext::shared_ptr<PricingEngine> engine(
                 new BinomialVanillaEngine_2<JarrowRudd>(bsmProcess,timeSteps,b1));

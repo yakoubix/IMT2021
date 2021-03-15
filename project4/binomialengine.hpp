@@ -133,19 +133,18 @@ namespace QuantLib {
         // Rollback to third-last step, and get underlying prices (s2) &
         // option values (p2) at this point
 
-        Real* prices_pen = new Real[timeSteps_ - 1];
-        Real* underlyings_pen = new Real[timeSteps_ - 1];
+        //Real* prices_pen = new Real[timeSteps_ - 1];
+        //Real* underlyings_pen = new Real[timeSteps_ - 1];
 
         if (oscillations_ == true) {
-            option.rollback(grid[timeSteps_ - 2]);
+            option.rollback(grid[timeSteps_ - 1]);
             Array vapenu(option.values());
-            QL_ENSURE(vapenu.size() == timeSteps_ - 1, "Expect time steps minus 1 nodes in grid at penultimate step");
-            for (int i = 0; i < timeSteps_-2; i++) {
-                underlyings_pen[i] = lattice->underlying(timeSteps_ - 2, i);
-                BlackCalculator bs_option(payoff->optionType(), payoff->strike(), underlyings_pen[i], v*std::sqrt(maturity/timeSteps_), std::exp(-r* maturity/ timeSteps_));
-                Real value_bs = bs_option.value();
-                prices_pen[i] = value_bs;
-                option.values()[i] = prices_pen[i];
+            QL_ENSURE(vapenu.size() == timeSteps_, "Expect time steps minus 1 nodes in grid at penultimate step");
+            for (int i = 0; i < timeSteps_; i++) {
+                Time dT = maturity / timeSteps_;
+                Real u_pen = lattice->underlying(timeSteps_ - 1, i);
+                BlackCalculator bs_option(payoff->optionType(), payoff->strike(), u_pen * std::exp((r - q) * dT), v*std::sqrt(dT), std::exp(-r*dT));
+                option.values()[i] = bs_option.value();
             } 
         }
         

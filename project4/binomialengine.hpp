@@ -133,8 +133,6 @@ namespace QuantLib {
         // Rollback to third-last step, and get underlying prices (s2) &
         // option values (p2) at this point
 
-        //Real* prices_pen = new Real[timeSteps_ - 1];
-        //Real* underlyings_pen = new Real[timeSteps_ - 1];
 
         if (oscillations_ == true) {
             option.rollback(grid[timeSteps_ - 1]);

@@ -138,8 +138,8 @@ namespace QuantLib {
             option.rollback(grid[timeSteps_ - 1]);
             Array vapenu(option.values());
             QL_ENSURE(vapenu.size() == timeSteps_, "Expect time steps minus 1 nodes in grid at penultimate step");
+            Time dT = maturity / timeSteps_;
             for (int i = 0; i < timeSteps_; i++) {
-                Time dT = maturity / timeSteps_;
                 Real u_pen = lattice->underlying(timeSteps_ - 1, i);
                 BlackCalculator bs_option(payoff->optionType(), payoff->strike(), u_pen * std::exp((r - q) * dT), v*std::sqrt(dT), std::exp(-r*dT));
                 option.values()[i] = bs_option.value();

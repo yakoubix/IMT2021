@@ -49,24 +49,53 @@ int main() {
 
         // options
         VanillaOption americanOption(payoff, americanExercise);
+        Size timeSteps_maxi = 600;
+        std::map<int, Real> summary_table;
+        std::map<int, Real> summary_table_n;
 
-        Size timeSteps = 423;
-        bool b1 = true;
-        ext::shared_ptr<PricingEngine> engine(
-                new BinomialVanillaEngine_2<JarrowRudd>(bsmProcess,timeSteps,b1));
-        americanOption.setPricingEngine(engine);
+        std::cout << "Binomial Tree with oscillations resolution scheme" << std::endl;
+        std::cout << "----------------------------------" << std::endl;
+        std::cout << "|" << " Time Step " << " |" << " Value " << "|" << " Elapsed Time " << std::endl;
+        for (int step = 3; step < timeSteps_maxi; step++) {
+            bool b1_oscillations = true;
+            ext::shared_ptr<PricingEngine> engine(
+                new BinomialVanillaEngine_2<AdditiveEQPBinomialTree>(bsmProcess, step, b1_oscillations));
+            americanOption.setPricingEngine(engine);
 
-        auto startTime = std::chrono::steady_clock::now();
+            auto startTime = std::chrono::steady_clock::now();
 
-        Real NPV = americanOption.NPV();
+            Real NPV = americanOption.NPV();
 
-        auto endTime = std::chrono::steady_clock::now();
+            auto endTime = std::chrono::steady_clock::now();
 
-        double us = std::chrono::duration_cast<std::chrono::microseconds>(endTime - startTime).count();
+            double us = std::chrono::duration_cast<std::chrono::microseconds>(endTime - startTime).count();
+            summary_table[step] = NPV;
+            std::cout << "|" << step << "           " << "|" << summary_table[step] << "|" << us / 1000000 << " s" << std::endl;
+            std::cout << "----------------------------------" << std::endl;
+            //std::cout << "NPV: " << NPV << std::endl;
+            //std::cout << "Elapsed time: " << us / 1000000 << " s" << std::endl;
+        }
+        
+        std::cout << "Binomial Tree without oscillations resolution scheme" << std::endl;
+        std::cout << "----------------------------------" << std::endl;
+        std::cout << "|" << " Time Step " << " |" << " Value " << "|" << " Elapsed Time " << std::endl;
+        for (int step = 3; step < timeSteps_maxi; step++) {
+            bool b2_noscillations = false;
+            ext::shared_ptr<PricingEngine> engine2(
+                new BinomialVanillaEngine_2<AdditiveEQPBinomialTree>(bsmProcess, step, b2_noscillations));
+            americanOption.setPricingEngine(engine2);
 
-        std::cout << "NPV: " << NPV << std::endl;
-        std::cout << "Elapsed time: " << us / 1000000 << " s" << std::endl;
+            auto startTime = std::chrono::steady_clock::now();
 
+            Real NPV = americanOption.NPV();
+
+            auto endTime = std::chrono::steady_clock::now();
+
+            double us = std::chrono::duration_cast<std::chrono::microseconds>(endTime - startTime).count();
+            summary_table_n[step] = NPV;
+            std::cout << "|" << step << "           " << "|" << summary_table_n[step] << "|" << us / 1000000 << " s" << std::endl;
+            std::cout << "----------------------------------" << std::endl;
+        }
         return 0;
 
     } catch (std::exception& e) {

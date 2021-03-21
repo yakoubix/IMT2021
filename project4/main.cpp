@@ -58,7 +58,7 @@ int main() {
         std::cout << "Binomial Tree with oscillations resolution scheme" << std::endl;
         std::cout << "----------------------------------" << std::endl;
         std::cout << "|" << " Time Step " << " |" << " Value " << "|" << " Elapsed Time " << std::endl;
-        const char* path1 = "./data_cpp4.txt";
+        const char* path1 = "C:/Users/Yakoubi/IMT2021/project4/data_cpp1.txt";
         std::ofstream myfile1;
         myfile1.open(path1);
         for (int step = 3; step < timeSteps_maxi; step++) {
@@ -80,8 +80,6 @@ int main() {
             myfile1 << step_to_write << " " << value_to_write << std::endl;
             std::cout << "|" << step << "           " << "|" << summary_table[step] << "|" << us / 1000000 << " s" << std::endl;
             std::cout << "----------------------------------" << std::endl;
-            //std::cout << "NPV: " << NPV << std::endl;
-            //std::cout << "Elapsed time: " << us / 1000000 << " s" << std::endl;
         }
         myfile1.close();
 

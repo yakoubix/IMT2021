@@ -142,7 +142,7 @@ namespace QuantLib {
             for (int i = 0; i < timeSteps_; i++) {
                 Real u_pen = lattice->underlying(timeSteps_ - 1, i);
                 BlackCalculator bs_option(payoff->optionType(), payoff->strike(), u_pen * std::exp((r - q) * dT), v*std::sqrt(dT), std::exp(-r*dT));
-                option.values()[i] = bs_option.value();
+                option.values()[i] = std::max(bs_option.value(), (*payoff)(u_pen));
             } 
         }
         
